@@ -108,8 +108,8 @@ public class BasicPool extends Application {
         
         
         
-        ArrayList<Ball> al = new ArrayList<Ball>();
-        ArrayList<Ball> pottedBalls = new ArrayList<Ball>();
+        ArrayList<Ball> al = new ArrayList<>();
+        
         al.add(cueBall);
         al.add(one);
         al.add(two);
@@ -144,13 +144,12 @@ public class BasicPool extends Application {
         root.getChildren().add(left);
         
         
-        // create collision table
-        Table<Ball, Ball, Boolean> colMap = HashBasedTable.create();
+        
         
         // Initialize map
         for(Ball item : al) {
             for(Ball item2 : al) {
-                colMap.put(item, item2, Boolean.FALSE);
+                Collision.colMap.put(item, item2, Boolean.FALSE);
             }
             
         }
@@ -161,19 +160,7 @@ public class BasicPool extends Application {
         root.getChildren().add(cue);
         
         
-        // Set button event
-        reset.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent e) {
-                // rerack()
-                for (Ball item : al) {
-                    item.setCenterX(table.getLayoutX() + item.initialPosition[0]);
-                    item.setCenterY(table.getLayoutY() + item.initialPosition[1]);
-                    item.setVX(0.0);
-                    item.setVY(0.0);
-                }
-                cue.reposition(cueBall);
-            }
-        });
+        
         
         // Display mouse position on screen
         Text t = new Text();
@@ -195,7 +182,7 @@ public class BasicPool extends Application {
             
             @Override
             public void handle(KeyEvent ke) {
-                System.out.println("Key Pressed: " + ke.getText());
+//                System.out.println("Key Pressed: " + ke.getText());
                 KeyCode code = ke.getCode();
                 if(cueBall.getTV() == 0) {
                     switch( code ) {
@@ -221,6 +208,8 @@ public class BasicPool extends Application {
                             System.out.println(cue.getCueTheta());
                             root.getChildren().remove(cue);
                             cue.setPresent(false);
+                            cue.resetPower();
+//                            loop.play();
                             break;
                         case E:
                             cue.decreasePower();
@@ -232,13 +221,6 @@ public class BasicPool extends Application {
                 }
             }
         });
-        
-        root.setOnKeyReleased(new EventHandler<KeyEvent>() {
-            public void handle(KeyEvent ke) {
-                
-            }
-        });
-        
         
         Timeline loop = new Timeline(new KeyFrame(Duration.millis(10), new EventHandler<ActionEvent>() {
 
@@ -259,100 +241,23 @@ public class BasicPool extends Application {
                         }
                     } else if (Pockets.checkRemove(ball1)) {
                         root.getChildren().remove(ball1);
-                        pottedBalls.add(ball1);
+                        Collision.pottedBalls.add(ball1);
                     }
                     
                     ball1.setVX(ball1.getVX() + ball1.acceleration[0] * deltaT);
                     
-                    for (Ball ball2 : al) {
-                        if (ball2 == ball1) continue;
-                        if (checkCollision(ball1, ball2)) {
-                            if (colMap.get(ball2,ball1) || colMap.get(ball1,ball2)) {
-                                System.out.println("Skip  " + ball2.velocity[0]);
-                            } else {
-                                // populate collision array entry ball1/ball2 & ball2/ball1
-                                colMap.put(ball1, ball2, Boolean.TRUE);
-                                colMap.put(ball2, ball1, Boolean.TRUE);
-                                System.out.println("Collision: " + ball1.name + " & " + ball2.name);
-                                System.out.println(ball2.velocity[0] + "    " + ball2.velocity[1]);
-
-                                //compute new v and a
-                                
-                                double diffX = (ball1.getCenterX() - ball2.getCenterX());
-                                double diffY = (ball1.getCenterY() - ball2.getCenterY());
-                                
-                                System.out.println("diffX " + diffX + " diffY " + diffY);
-                                
-                                if(abs(diffX) < .001) diffX = 0;
-                                if(abs(diffY) < .001) diffY = 0;
-                                
-                                double nMag = sqrt(pow(diffX,2) + pow(diffY,2));
-                                
-                                System.out.println("diffX " + diffX + " diffY " + diffY);
-                                
-                                double nX = diffX/nMag;
-                                double nY = diffY/nMag;
-                                
-                                if(abs(diffX) < .001) nX = 0;
-                                if(abs(diffY) < .001) nY = 0;
-                                
-                                System.out.println("nX " + nX + " nY " + nY);
-                                
-                                
-                                // Vector normal to collision plane
-                                double[] normalVectorBall1 = {nX, nY};
-                                double[] normalVectorBall2 = {-nX, -nY};
-                                
-                                double[] tangentVectorBall1 = {nY, -nX};
-                                double[] tangentVectorBall2 = {-nY, nX};
-                                double theta = Math.atan(diffY/diffX);
-                                
-                                double velNormDotProd1 = (ball1.getVX() * nX) + (ball1.getVY() * nY);
-                                double velNormDotProd2 = (ball2.getVX() * -nX) + (ball2.getVY() * -nY);
-                                
-                                double velTanDotProd1 = (ball1.getVX() * nY) + (ball1.getVY() * -nX);
-                                double velTanDotProd2 = (ball2.getVX() * -nY) + (ball2.getVY() * nX);
-                                
-                                double[] velNorm1 = {velNormDotProd1 * nX, velNormDotProd1 * nY};
-                                double[] velNorm2 = {velNormDotProd2 * -nX, velNormDotProd2 * -nY};
-                                
-                                double[] velTan1 = {velTanDotProd1 * nY, velTanDotProd1 * -nX};
-                                double[] velTan2 = {velTanDotProd2 * -nY, velTanDotProd2 * nX};
-                                
-                                System.out.println(theta + "  " + ball1.getCenterX() + "  " + ball2.getCenterX());
-                                System.out.println("     NORMAL COMPONENTS    ");
-                                System.out.println(ball1.name + " Vnx: " + velNorm1[0] + " Vny: " + velNorm1[1]);
-                                System.out.println(ball2.name + " Vnx: " + velNorm2[0] + " Vny: " + velNorm2[1]);
-                                
-                                System.out.println("     Tangential COMPONENTS    ");
-                                System.out.println(ball1.name + " Vtx: " + velTan1[0] + " Vty: " + velTan1[1]);
-                                System.out.println(ball2.name + " Vtx: " + velTan2[0] + " Vty: " + velTan2[1]);
-                                
-                                ball1.velocity[0] = velNorm2[0] + velTan1[0];
-                                ball1.velocity[1] = velNorm2[1] + velTan1[1];
-                                
-                                ball2.velocity[0] = velNorm1[0] + velTan2[0];
-                                ball2.velocity[1] = velNorm1[1] + velTan2[1];
-                                
-                                System.out.println("    TOTAL VELOCITY   ");
-                                System.out.println(ball1.name + " Vx " + ball1.velocity[0] + " Vy " + ball1.velocity[1]);
-                                System.out.println(ball2.name + " Vx " + ball2.velocity[0] + " Vy " + ball2.velocity[1]);
-                              
-                                
-                            }
-                        } 
-                    }
+                    Collision.collide(ball1, al);
                     
                     // ball1 new v/a/x/y
-                    ball1.deltaX = ball1.velocity[0] * deltaT + .5 * ball1.acceleration[0] * Math.pow(deltaT, 2);
-                    ball1.deltaY = ball1.velocity[1] * deltaT + .5 * ball1.acceleration[0] * Math.pow(deltaT, 2);
+                    ball1.deltaX = ball1.getVX() * deltaT + .5 * ball1.acceleration[0] * Math.pow(deltaT, 2);
+                    ball1.deltaY = ball1.getVY() * deltaT + .5 * ball1.acceleration[0] * Math.pow(deltaT, 2);
                     
-                    if (abs(ball1.velocity[0]) < 1) ball1.velocity[0] = 0;
-                    if (abs(ball1.velocity[1]) < 1) ball1.velocity[1] = 0;
+                    if (abs(ball1.getVX()) < 1) ball1.setVX(0);
+                    if (abs(ball1.getVY()) < 1) ball1.setVY(0);
                     
-                    if (abs(ball1.velocity[0]) > 0) {ball1.acceleration[0] = -((ball1.velocity[0]/abs(ball1.velocity[0])) * 25);}
+                    if (abs(ball1.getVX()) > 0) {ball1.acceleration[0] = -(signum(ball1.getVX()) * 25);}
                     else ball1.acceleration[0] = 0;
-                    if (abs(ball1.velocity[1]) > 0) {ball1.acceleration[1] = -((ball1.velocity[1]/abs(ball1.velocity[1])) * 25);}
+                    if (abs(ball1.getVY()) > 0) {ball1.acceleration[1] = -(signum(ball1.getVY()) * 25);}
                     else ball1.acceleration[1] = 0;
                     
                     ball1.velocity[0] += ball1.acceleration[0] * deltaT;
@@ -377,21 +282,20 @@ public class BasicPool extends Application {
                     ball1.left.setEndX(283);
                     ball1.right.setEndX(997);
                     
+                    
                 }
 
                 if(x%2 == 0) {                    
                     for(Ball item : al) {
                         for(Ball item2 : al) {
-                            colMap.put(item, item2, Boolean.FALSE);
+                            Collision.colMap.put(item, item2, Boolean.FALSE);
                         }
                     }
                 }
                 
                 x += 1;
                 
-                if(cueBall.getTV() == 0 && !cue.getPresent()) {
-//                    cue.setEndX(cueBall.getCenterX());
-//                    cue.setEndY(cueBall.getCenterY());
+                if(Ball.checkMotion(al) && !cue.getPresent()) {
                     System.out.println("Cue eX:  " + cue.getEndX());
                     cue.reposition(cueBall);
                     rotateCW.setPivotX(cueBall.getCenterX());
@@ -401,11 +305,41 @@ public class BasicPool extends Application {
                     System.out.println("Cue eX:  " + cue.getEndX());
                     root.getChildren().add(cue);
                     cue.setPresent(true);
+//                    loop.pause();
                 }
 
             }
 
         }));
+        
+        // Set button event
+        reset.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                // rerack()
+                for (Ball item : al) {
+                    item.setCenterX(table.getLayoutX() + item.initialPosition[0]);
+                    item.setCenterY(table.getLayoutY() + item.initialPosition[1]);
+                    item.setVX(0.0);
+                    item.setVY(0.0);
+                }
+                System.out.println("Cue eX:  " + cue.getEndX());
+                cue.reposition(cueBall);
+                rotateCW.setPivotX(cueBall.getCenterX());
+                rotateCCW.setPivotX(cueBall.getCenterX());
+                rotateCW.setPivotY(cueBall.getCenterY());
+                rotateCCW.setPivotY(cueBall.getCenterY());
+                if(!cue.getPresent()) root.getChildren().add(cue);
+                System.out.println("Cue eX:  " + cue.getEndX());
+                
+                for (Ball item : Collision.pottedBalls) {
+                    if(!root.getChildren().contains(item)) {
+                        root.getChildren().add(item);
+                    }
+                }
+                Collision.pottedBalls.clear();
+//                loop.pause();
+            }
+        });
         
       
         t.setFill(Color.MEDIUMSEAGREEN);
@@ -440,17 +374,8 @@ public class BasicPool extends Application {
                 return false;
     }
     
-    public boolean checkCollision(Circle ball1, Circle ball2) {
-        double X1 = ball1.getCenterX();
-        double Y1 = ball1.getCenterY();
-        double X2 = ball2.getCenterX();
-        double Y2 = ball2.getCenterY();
-        if (sqrt(pow(abs(X1-X2),2)+pow(abs(Y1-Y2),2)) <= (2*RADIUS)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    
+    
     
 }
 

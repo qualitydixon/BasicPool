@@ -7,6 +7,7 @@
 package basicpool;
 
 import static basicpool.Config.RADIUS;
+import java.util.ArrayList;
 import java.util.stream.DoubleStream;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -22,11 +23,14 @@ class Ball extends Circle {
     String color;
     double mass = 1;
     double velocity[] = {0.0, 0.0};
+    
     double acceleration[] = {0.0, 0.0};
     double[] initialPosition = {0.0, 0.0};
     Line top, bottom, left, right;
     double deltaX = 1;
     double deltaY = 1;
+    
+    public static double motion;
     
     public Ball(int radius, Color col, double startPos[], String name) {
         super(radius, col);
@@ -65,6 +69,15 @@ class Ball extends Circle {
     
     boolean checkInPocket() {
         if(this.getCenterY() < 222 || this.getCenterY() > 545) return true;
+        else return false;
+    }
+    
+    static boolean checkMotion(ArrayList<Ball> l) {
+        motion = 0;
+        for(Ball item : l) {
+            motion += item.getTV();
+        }
+        if(motion == 0) return true;
         else return false;
     }
 }

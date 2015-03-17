@@ -23,6 +23,7 @@ public class Cue extends Line {
     boolean cuePresent;
     double power = 0;
     double MAXPOWER = 900;
+    Line pathLine;
     
     public Cue(Ball cb) {
         super(); 
@@ -60,9 +61,13 @@ public class Cue extends Line {
         return;
     }
     
+    void resetPower() {
+        this.power = 0;
+    }
+    
     void reposition(Ball cb) {
         this.setStartX(cb.getCenterX() - 150);
-        this.setStartY(cb.getCenterY() - 150);
+        this.setStartY(cb.getCenterY());
         this.setEndX(cb.getCenterX());
         this.setEndY(cb.getCenterY());
     }
