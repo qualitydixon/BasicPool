@@ -34,7 +34,7 @@ public class Config {
     public static final double BOTTOMWALL = 360;
     
     // Init Positions
-    public static final double CUEPOS[]   = {100, SPOTY - 5};
+    public static final double CUEPOS[]   = {100, SPOTY};
     public static final double ONEPOS[]   = {SPOTX, SPOTY};
     public static final double TWOPOS[]   = {SPOTX + 20.01, SPOTY - 10.01};
     public static final double THREEPOS[] = {SPOTX + 20.01, SPOTY + 10.01};

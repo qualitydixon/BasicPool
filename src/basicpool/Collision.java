@@ -13,6 +13,7 @@ import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
+import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
 
 /**
@@ -20,12 +21,7 @@ import javafx.scene.shape.Circle;
  * @author Mike
  */
 public class Collision {
-    
-//    static double nX(Ball b1, Ball b2) {
-//        double diffX = (b1.getCenterX() - b2.getCenterX());
-//        if(abs(diffX) < .001) diffX = 0;
-//    }
-    
+     
     // create collision table
     static Table<Ball, Ball, Boolean> colMap = HashBasedTable.create();
     static ArrayList<Ball> pottedBalls = new ArrayList<>();
@@ -40,6 +36,22 @@ public class Collision {
         } else {
             return false;
         }
+    }
+    
+    public static boolean checkWallCollisionX(Ball ball) {
+            if (abs(ball.right.getEndX() - ball.right.getStartX()) <= RADIUS || abs(ball.left.getStartX() - ball.left.getEndX()) <= RADIUS) {
+                    return true;
+            }
+            else 
+                return false;
+    }
+    
+    public static boolean checkWallCollisionY(Ball ball) {
+            if (abs(ball.bottom.getEndY() - ball.bottom.getStartY()) <= RADIUS || abs(ball.top.getStartY() - ball.top.getEndY()) <= RADIUS) {
+                    return true;
+            }
+            else 
+                return false;
     }
     
     static void collide(Ball ball1, ArrayList<Ball> al) {

@@ -232,19 +232,19 @@ public class BasicPool extends Application {
                 for ( Ball ball1 : al) {
 
                     if(!Pockets.checkPockets(ball1)) {
-                        if (checkWallCollisionX(ball1, table)) {
+                        if (Collision.checkWallCollisionX(ball1)) {
                             ball1.setVX(ball1.getVX() * -1); 
                         }
                     
-                        if (checkWallCollisionY(ball1, table)) {
+                        if (Collision.checkWallCollisionY(ball1)) {
                             ball1.setVY(ball1.getVY() * -1);
                         }
                     } else if (Pockets.checkRemove(ball1)) {
                         root.getChildren().remove(ball1);
+                        ball1.setVX(0);
+                        ball1.setVY(0);
                         Collision.pottedBalls.add(ball1);
                     }
-                    
-                    ball1.setVX(ball1.getVX() + ball1.acceleration[0] * deltaT);
                     
                     Collision.collide(ball1, al);
                     
@@ -296,6 +296,15 @@ public class BasicPool extends Application {
                 x += 1;
                 
                 if(Ball.checkMotion(al) && !cue.getPresent()) {
+                    if(Collision.pottedBalls.size() != 0) {
+                        if(Collision.pottedBalls.get(Collision.pottedBalls.size() - 1) == cueBall) {
+                            cueBall.setCenterX(table.getLayoutX() + CUEPOS[0]);
+                            cueBall.setCenterY(table.getLayoutY() + CUEPOS[1]);
+                            root.getChildren().add(cueBall);
+                            Collision.pottedBalls.remove(Collision.pottedBalls.size() - 1);
+
+                        }
+                    }
                     System.out.println("Cue eX:  " + cue.getEndX());
                     cue.reposition(cueBall);
                     rotateCW.setPivotX(cueBall.getCenterX());
@@ -358,21 +367,7 @@ public class BasicPool extends Application {
     }
     
     
-    public boolean checkWallCollisionX(Ball ball, ImageView tab) {
-            if (abs(ball.right.getEndX() - ball.right.getStartX()) <= RADIUS || abs(ball.left.getStartX() - ball.left.getEndX()) <= RADIUS) {
-                    return true;
-            }
-            else 
-                return false;
-    }
     
-    public boolean checkWallCollisionY(Ball ball, ImageView tab) {
-            if (abs(ball.bottom.getEndY() - ball.bottom.getStartY()) <= RADIUS || abs(ball.top.getStartY() - ball.top.getEndY()) <= RADIUS) {
-                    return true;
-            }
-            else 
-                return false;
-    }
     
     
     
