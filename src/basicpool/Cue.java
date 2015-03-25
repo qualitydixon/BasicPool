@@ -23,13 +23,13 @@ public class Cue extends Line {
     boolean cuePresent;
     double power = 0;
     double MAXPOWER = 900;
-    Line pathLine;
+    public static Line pathLine = new Line();
     
     public Cue(Ball cb) {
         super(); 
         super.setStrokeWidth(5);
         super.setStartX(cb.getCenterX() - 150);
-        super.setStartY(cb.getCenterY() - 150);
+        super.setStartY(cb.getCenterY());
         super.setEndX(cb.getCenterX());
         super.setEndY(cb.getCenterY());
     }
@@ -96,6 +96,13 @@ public class Cue extends Line {
         ball1.setVX(power*nX);
         ball1.setVY(power*nY);
         
+    }
+    
+    static void updatePath(Ball cb) {
+        pathLine.setStartX(cb.getCenterX());
+        pathLine.setStartY(cb.getCenterY());
+        pathLine.setEndX(pathLine.getStartX() + 800);
+        pathLine.setEndY(pathLine.getStartY());
     }
     
 }

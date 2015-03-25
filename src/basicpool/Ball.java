@@ -23,7 +23,6 @@ class Ball extends Circle {
     String color;
     double mass = 1;
     double velocity[] = {0.0, 0.0};
-    
     double acceleration[] = {0.0, 0.0};
     double[] initialPosition = {0.0, 0.0};
     Line top, bottom, left, right;

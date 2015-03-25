@@ -38,6 +38,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Circle;
@@ -83,6 +84,8 @@ public class BasicPool extends Application {
         reset.setLayoutX(640);
         reset.setLayoutY(700);
         root.getChildren().add(reset);
+        
+        VBox vbox = new VBox(3); // spacing = 3
         
         
         
@@ -159,6 +162,8 @@ public class BasicPool extends Application {
         cue.setPresent(true);
         root.getChildren().add(cue);
         
+        Cue.pathLine.setStroke(Color.SANDYBROWN);
+        root.getChildren().add(Cue.pathLine);
         
         
         
@@ -178,49 +183,7 @@ public class BasicPool extends Application {
         Rotate rotateCW = new Rotate(2, cueBall.getCenterX(), cueBall.getCenterY());
         
         
-        root.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            
-            @Override
-            public void handle(KeyEvent ke) {
-//                System.out.println("Key Pressed: " + ke.getText());
-                KeyCode code = ke.getCode();
-                if(cueBall.getTV() == 0) {
-                    switch( code ) {
-                        case A:
-                            cue.getTransforms().add(rotateCCW);
-                            cue.setCueTheta((cue.getCueTheta() - 2));
-                            break;
-                        case W:
-                            cue.getTransforms().add(rotateCW);
-                            cue.setCueTheta((cue.getCueTheta() + 2));
-                            break;
-                        case S:
-                            cue.getTransforms().add(rotateCCW);
-                            cue.setCueTheta((cue.getCueTheta() - 2));
-                            break;
-                        case D:
-                            cue.getTransforms().add(rotateCW);
-                            cue.setCueTheta((cue.getCueTheta() + 2));
-                            break;
-                        case F:
-                            cue.shoot(cueBall);
-                            System.out.println(cueBall.getVX() + "    " + cueBall.getVY());
-                            System.out.println(cue.getCueTheta());
-                            root.getChildren().remove(cue);
-                            cue.setPresent(false);
-                            cue.resetPower();
-//                            loop.play();
-                            break;
-                        case E:
-                            cue.decreasePower();
-                            break;
-                        case R:
-                            cue.increasePower();
-                            break;
-                    } 
-                }
-            }
-        });
+        
         
         Timeline loop = new Timeline(new KeyFrame(Duration.millis(10), new EventHandler<ActionEvent>() {
 
@@ -250,7 +213,7 @@ public class BasicPool extends Application {
                     
                     // ball1 new v/a/x/y
                     ball1.deltaX = ball1.getVX() * deltaT + .5 * ball1.acceleration[0] * Math.pow(deltaT, 2);
-                    ball1.deltaY = ball1.getVY() * deltaT + .5 * ball1.acceleration[0] * Math.pow(deltaT, 2);
+                    ball1.deltaY = ball1.getVY() * deltaT + .5 * ball1.acceleration[1] * Math.pow(deltaT, 2);
                     
                     if (abs(ball1.getVX()) < 1) ball1.setVX(0);
                     if (abs(ball1.getVY()) < 1) ball1.setVY(0);
@@ -275,33 +238,36 @@ public class BasicPool extends Application {
                     }
                     ball1.top.setEndX(ball1.getCenterX());
                     ball1.bottom.setEndX(ball1.getCenterX());
-                    ball1.left.setEndY(ball1.getCenterY());
-                    ball1.right.setEndY(ball1.getCenterY());
-                    ball1.top.setEndY(222);
-                    ball1.bottom.setEndY(545);
                     ball1.left.setEndX(283);
                     ball1.right.setEndX(997);
+                    
+                    ball1.top.setEndY(222);
+                    ball1.bottom.setEndY(545);
+                    ball1.left.setEndY(ball1.getCenterY());
+                    ball1.right.setEndY(ball1.getCenterY());
+                    
                     
                     
                 }
 
-                if(x%2 == 0) {                    
-                    for(Ball item : al) {
-                        for(Ball item2 : al) {
-                            Collision.colMap.put(item, item2, Boolean.FALSE);
-                        }
+                                    
+                for(Ball item : al) {
+                    for(Ball item2 : al) {
+                        Collision.colMap.put(item, item2, Boolean.FALSE);
                     }
                 }
                 
-                x += 1;
+                
+//                x += 1;
                 
                 if(Ball.checkMotion(al) && !cue.getPresent()) {
-                    if(Collision.pottedBalls.size() != 0) {
-                        if(Collision.pottedBalls.get(Collision.pottedBalls.size() - 1) == cueBall) {
-                            cueBall.setCenterX(table.getLayoutX() + CUEPOS[0]);
-                            cueBall.setCenterY(table.getLayoutY() + CUEPOS[1]);
+                    if(!Collision.pottedBalls.isEmpty()) {
+                        if(Collision.pottedBalls.contains(cueBall)) {
+                            cueBall.setCenterX(table.getLayoutX() + cueBall.initialPosition[0]);
+                            cueBall.setCenterY(table.getLayoutY() + cueBall.initialPosition[1]);
                             root.getChildren().add(cueBall);
-                            Collision.pottedBalls.remove(Collision.pottedBalls.size() - 1);
+                            Collision.pottedBalls.remove(cueBall);
+                            System.out.println("Put me back!");
 
                         }
                     }
@@ -314,12 +280,69 @@ public class BasicPool extends Application {
                     System.out.println("Cue eX:  " + cue.getEndX());
                     root.getChildren().add(cue);
                     cue.setPresent(true);
+                    Cue.updatePath(cueBall);
+                    Cue.pathLine.setStroke(Color.SANDYBROWN);
 //                    loop.pause();
                 }
 
             }
 
         }));
+        
+        root.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            
+            @Override
+            public void handle(KeyEvent ke) {
+//                System.out.println("Key Pressed: " + ke.getText());
+                KeyCode code = ke.getCode();
+                if(cueBall.getTV() == 0) {
+                    switch( code ) {
+                        case A:
+                            cue.getTransforms().add(rotateCCW);
+                            Cue.updatePath(cueBall);
+                            Cue.pathLine.getTransforms().add(rotateCCW);
+                            cue.setCueTheta((cue.getCueTheta() - 2));
+                            break;
+                        case W:
+                            cue.getTransforms().add(rotateCW);
+                            cue.setCueTheta((cue.getCueTheta() + 2));
+                            Cue.updatePath(cueBall);
+                            Cue.pathLine.getTransforms().add(rotateCW);
+                            if(Cue.pathLine.getBoundsInParent().intersects(one.getBoundsInParent())) { Cue.pathLine.setStroke(Color.RED); }
+                            else Cue.pathLine.setStroke(Color.BLUE);
+                            break;
+                        case S:
+                            cue.getTransforms().add(rotateCCW);
+                            cue.setCueTheta((cue.getCueTheta() - 2));
+                            Cue.updatePath(cueBall);
+                            Cue.pathLine.getTransforms().add(rotateCCW);
+                            break;
+                        case D:
+                            cue.getTransforms().add(rotateCW);
+                            cue.setCueTheta((cue.getCueTheta() + 2));
+                            Cue.updatePath(cueBall);
+                            Cue.pathLine.getTransforms().add(rotateCW);
+                            break;
+                        case F:
+                            cue.shoot(cueBall);
+                            Cue.pathLine.setStroke(Color.TRANSPARENT);
+                            System.out.println(cueBall.getVX() + "    " + cueBall.getVY());
+                            System.out.println(cue.getCueTheta());
+                            root.getChildren().remove(cue);
+                            cue.setPresent(false);
+                            cue.resetPower();
+                            loop.play();
+                            break;
+                        case E:
+                            cue.decreasePower();
+                            break;
+                        case R:
+                            cue.increasePower();
+                            break;
+                    } 
+                }
+            }
+        });
         
         // Set button event
         reset.setOnAction(new EventHandler<ActionEvent>() {
@@ -346,7 +369,7 @@ public class BasicPool extends Application {
                     }
                 }
                 Collision.pottedBalls.clear();
-//                loop.pause();
+                loop.pause();
             }
         });
         
@@ -366,12 +389,7 @@ public class BasicPool extends Application {
         primaryStage.show();
     }
     
-    
-    
-    
-    
-    
-    
+   
 }
 
     

@@ -26,7 +26,7 @@ public class Collision {
     static Table<Ball, Ball, Boolean> colMap = HashBasedTable.create();
     static ArrayList<Ball> pottedBalls = new ArrayList<>();
     
-    public static boolean checkCollision(Circle ball1, Circle ball2) {
+    static boolean checkCollision(Circle ball1, Circle ball2) {
         double X1 = ball1.getCenterX();
         double Y1 = ball1.getCenterY();
         double X2 = ball2.getCenterX();
@@ -38,7 +38,7 @@ public class Collision {
         }
     }
     
-    public static boolean checkWallCollisionX(Ball ball) {
+    static boolean checkWallCollisionX(Ball ball) {
             if (abs(ball.right.getEndX() - ball.right.getStartX()) <= RADIUS || abs(ball.left.getStartX() - ball.left.getEndX()) <= RADIUS) {
                     return true;
             }
@@ -46,7 +46,7 @@ public class Collision {
                 return false;
     }
     
-    public static boolean checkWallCollisionY(Ball ball) {
+    static boolean checkWallCollisionY(Ball ball) {
             if (abs(ball.bottom.getEndY() - ball.bottom.getStartY()) <= RADIUS || abs(ball.top.getStartY() - ball.top.getEndY()) <= RADIUS) {
                     return true;
             }
@@ -59,7 +59,7 @@ public class Collision {
                         if (ball2 == ball1 || pottedBalls.contains(ball2)) continue;
                         if (checkCollision(ball1, ball2)) {
                             if (colMap.get(ball2,ball1) || colMap.get(ball1,ball2)) {
-                                System.out.println("Skip  " + ball2.velocity[0]);
+                                System.out.println("   !!!!!!!!!!!!!!!!!!!!!!!!SKIP!!!!!!!!!!!!!!!!!!!!!!!!!  ");
                             } else {
                                 // populate collision array entry ball1/ball2 & ball2/ball1
                                 colMap.put(ball1, ball2, Boolean.TRUE);
