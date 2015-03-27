@@ -87,6 +87,16 @@ public class BasicPool extends Application {
         
         VBox vbox = new VBox(3); // spacing = 3
         
+        Sphere testBall = new Sphere(10);
+        PhongMaterial material = new PhongMaterial();
+        material.setDiffuseColor(Color.RED);
+        //Shadow Color
+        material.setSpecularColor(Color.rgb(30, 30, 30));
+        testBall.setTranslateX(300);
+        testBall.setTranslateY(300);
+        testBall.setMaterial(material);
+        root.getChildren().add(testBall);
+        System.out.println(testBall.getDivisions());
         
         
         Ball cueBall = new Ball(RADIUS, Color.WHITE, CUEPOS, CUEBALL);
@@ -212,19 +222,22 @@ public class BasicPool extends Application {
                     Collision.collide(ball1, al);
                     
                     // ball1 new v/a/x/y
-                    ball1.deltaX = ball1.getVX() * deltaT + .5 * ball1.acceleration[0] * Math.pow(deltaT, 2);
-                    ball1.deltaY = ball1.getVY() * deltaT + .5 * ball1.acceleration[1] * Math.pow(deltaT, 2);
+                    ball1.deltaX = ball1.getVX() * deltaT + .5 * ball1.acceleration * Math.pow(deltaT, 2);
+                    ball1.deltaY = ball1.getVY() * deltaT + .5 * ball1.acceleration * Math.pow(deltaT, 2);
                     
                     if (abs(ball1.getVX()) < 1) ball1.setVX(0);
                     if (abs(ball1.getVY()) < 1) ball1.setVY(0);
                     
-                    if (abs(ball1.getVX()) > 0) {ball1.acceleration[0] = -(signum(ball1.getVX()) * 25);}
-                    else ball1.acceleration[0] = 0;
-                    if (abs(ball1.getVY()) > 0) {ball1.acceleration[1] = -(signum(ball1.getVY()) * 25);}
-                    else ball1.acceleration[1] = 0;
+                    if (abs(ball1.getVX()) > 0) {ball1.acceleration = 25;}
+                    else ball1.acceleration = 0;
+                    if (abs(ball1.getVY()) > 0) {ball1.acceleration = 25;}
+                    else ball1.acceleration = 0;
                     
-                    ball1.velocity[0] += ball1.acceleration[0] * deltaT;
-                    ball1.velocity[1] += ball1.acceleration[1] * deltaT;
+                    double totVel = ball1.getTV();
+                    ball1.setVX((totVel - (ball1.acceleration * deltaT)) * Math.cos(ball1.getVtheta()));
+                    ball1.setVY((totVel - (ball1.acceleration * deltaT)) * Math.sin(ball1.getVtheta()));
+//                    ball1.velocity[0] += ball1.acceleration[0] * deltaT;
+//                    ball1.velocity[1] += ball1.acceleration[1] * deltaT;
                     
 
                     

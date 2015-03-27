@@ -7,11 +7,13 @@
 package basicpool;
 
 import static basicpool.Config.RADIUS;
+import static java.lang.Math.pow;
 import java.util.ArrayList;
 import java.util.stream.DoubleStream;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Sphere;
 
 /**
  *
@@ -23,7 +25,8 @@ class Ball extends Circle {
     String color;
     double mass = 1;
     double velocity[] = {0.0, 0.0};
-    double acceleration[] = {0.0, 0.0};
+    double vTheta = 0;
+    double acceleration = 0.0;
     double[] initialPosition = {0.0, 0.0};
     Line top, bottom, left, right;
     double deltaX = 1;
@@ -63,7 +66,12 @@ class Ball extends Circle {
     }
     
     public double getTV() {
-        return DoubleStream.of(this.velocity).sum();
+        double tv = Math.sqrt(pow(this.velocity[0],2) + pow(this.velocity[1], 2));
+        return tv;
+    }
+    
+    public double getVtheta() {
+        return Math.atan2(this.velocity[1],this.velocity[0]);
     }
     
     boolean checkInPocket() {
